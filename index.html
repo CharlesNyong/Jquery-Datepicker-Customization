@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Tour Form</title>
+<link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/themes/smoothness/jquery-ui.css">
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.3/jquery.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jqueryui/1.11.4/jquery-ui.min.js"></script>	
+<script type="text/javascript">
+	var monthToEnableWeekends = new Array();
+  	var arrDatesToHide = new Array();
+  	var arrWeekDatesToHide = new Array();
+  	var dayCount = 1;
+  	var blnDateFound = false;
+  	var today = new Date();
+	window.onload = function(){
+      //jQuery.support.cors = true;   
+      $.ajax({
+          url: 'http://asikpo.myweb.cs.uwindsor.ca/TourCalendar/common.php',
+          type: 'POST',
+          data: {
+              action: 'getMonthWeekendToEnable'
+            },
+          dataType: 'json',
+          //crossDomain:true,
+          success: function(data){
+             //strMonthsToHide = data[0];
+             //monthToEnableWeekends = strMonthsToHide.split(","); 
+             //console.log("Data " + strMonthsToHide);          
+            for (var property in data) {
+             monthToEnableWeekends.push(parseInt(data[property]));
+             //console.log("key: " + property + " val at index " + data[property]);  
+              //output += property + ': ' + data[property]+'; ';
+            }
+          },  
+          error: function(request, response){
+            console.log(request.responseText);
+          } 
+      });
+
+      $.ajax({
+          url: 'http://asikpo.myweb.cs.uwindsor.ca/TourCalendar/common.php',
+          type: 'POST',
+          data: {
+              action: 'getDateToHide'
+            },
+          dataType: 'json',
+          success: function(data){
+             //strMonthsToHide = data[0];
+             //monthToEnableWeekends = strMonthsToHide.split(","); 
+             //console.log("Data " + strMonthsToHide);          
+            for (var property in data) {
+             arrDatesToHide.push(data[property]);
+             //console.log("key: " + property + " val at index " + data[property]);  
+              //output += property + ': ' + data[property]+'; ';
+            }
+          },  
+          error: function(request, response){
+            console.log(request.responseText);
+          } 
+      });
+
+
+      dtmM = today.getMonth() < 10 ? "0" + (today.getMonth() + 1) : (today.getMonth() + 1);
+      dtmD = today.getDate() < 10 ? "0" + today.getDate() : today.getDate(); 
+      dtmCurrentDate = dtmM + "/" + dtmD + "/" + today.getFullYear();
+      
+      $("#datepicker").datepicker({
+          beforeShowDay: function (date) {
+          locale = "en-us",
+            month = date.toLocaleString(locale, { month: "long" });
+        // console.log("daycount " + dayCount + " WeekCount: " + weekCount + " getMonth: " + date.getMonth() +  " Date: " + date.getDate() + " Month name: " + month);  
+          dtmMonth = date.getMonth() < 10 ? "0" + (date.getMonth() + 1) : (date.getMonth() + 1);
+        dtmDay = date.getDate() < 10 ? "0" + date.getDate() : date.getDate(); 
+          var dtmDate = dtmMonth + "/" + dtmDay + "/" + date.getFullYear();
+
+          // if(blnFirstTime){
+          //  curMonth = date.getMonth();
+          //  blnFirstTime = false;
+          // }
+
+          if(dtmCurrentDate == dtmDate){
+            blnDateFound = true; 
+          }
+
+          if(blnDateFound){
+            if(dayCount <= 7){
+              arrWeekDatesToHide.push(dtmDate);
+            }
+            dayCount ++;
+          }
+          
+          if ((($.inArray(date.getMonth() , monthToEnableWeekends) == -1) && (date.getUTCDay() == "0" 
+            || date.getUTCDay() == "6")) || ($.inArray(dtmDate, arrDatesToHide) > -1)
+            || ($.inArray(dtmDate, arrWeekDatesToHide) > -1) ){
+
+              // locale = "en-us",
+              // month = date.toLocaleString(locale, { month: "long" });
+               //console.log("Date to hide: " + dtmDateToHide + " dtmDate " + dtmDate);
+              return [false, ''];
+            }
+            else if(($.inArray(date.getMonth() , monthToEnableWeekends) > -1) && date.getUTCDay() == "0"){
+              // locale = "en-us",
+              // month = date.toLocaleString(locale, { month: "long" });
+              // console.log("Month name: " + month + " Number: " + date.getMonth());
+              return [false, ''];
+            }
+            else{
+              return [true, ''];
+            }
+            //return [true, ''];
+            //console.log("type of Month: " + typeof(daysInMonths(date.getMonth(), date.getYear())));
+            //console.log("Month: " + daysInMonths(date.getMonth(), date.getYear()));
+      },
+      minDate: 0
+      });
+    }
+
+</script>
+<style type="text/css">
+	#tourFrm{
+		width: 300px;
+    border-width: thick;
+    border-color: red;
+	}
+</style>	
+</head>
+<body>
+<fieldset id="tourFrm">
+	<legend><b>Preview settings</b></legend>
+			Tour Date: <input type="text" name="" id="datepicker"/><br/><br/>
+</fieldset>
+</body>
+</html>	
