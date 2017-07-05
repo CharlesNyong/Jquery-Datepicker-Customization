@@ -232,12 +232,12 @@ ob_start();
 	#dateList{
 		/*margin-left: 1500px;*/
 		margin-top: 70px;
-		overflow-y: scroll;
 		/*float: left;*/
 	}
 
 	#hiddenDates{
 		background-color: #F5DEB3;
+		overflow-y: scroll;
 	}
 
 	li{
